@@ -1,26 +1,17 @@
 import { useState } from "react";
 import { useGetIdentity } from "@pankod/refine-core";
-import {
-  FieldValue,
-  FieldValues,
-  useForm,
-} from "@pankod/refine-react-hook-form";
+import { FieldValues, useForm } from "@pankod/refine-react-hook-form";
 import { useNavigate } from "@pankod/refine-react-router-v6";
 import Form from "components/common/Form";
 
 const CreatePost = () => {
   const navigate = useNavigate();
   const { data: user } = useGetIdentity();
-  // if (user?.email !== process.env.REACT_APP_ADMIN_USER) {
-  //   navigate("/");
-  // }
   if (!user) {
     navigate("/");
   }
   const [postImage, setPostImage] = useState({ name: "", url: "" });
   const [postImage2, setPostImage2] = useState({ name: "", url: "" });
-  // const [postImage3, setPostImage3] = useState({ name: "", url: "" });
-  // const [postImage4, setPostImage4] = useState({ name: "", url: "" });
   const {
     refineCore: { onFinish, formLoading },
     register,
@@ -51,30 +42,6 @@ const CreatePost = () => {
       setPostImage2({ name: file?.name, url: result })
     );
   };
-  // const handleImageChange3 = (file: File) => {
-  //   const reader = (readFile: File) =>
-  //     new Promise<string>((resolve, reject) => {
-  //       const fileReader = new FileReader();
-  //       fileReader.onload = () => resolve(fileReader.result as string);
-  //       fileReader.readAsDataURL(readFile);
-  //     });
-
-  //   reader(file).then((result: string) =>
-  //     setPostImage3({ name: file?.name, url: result })
-  //   );
-  // };
-  // const handleImageChange4 = (file: File) => {
-  //   const reader = (readFile: File) =>
-  //     new Promise<string>((resolve, reject) => {
-  //       const fileReader = new FileReader();
-  //       fileReader.onload = () => resolve(fileReader.result as string);
-  //       fileReader.readAsDataURL(readFile);
-  //     });
-
-  //   reader(file).then((result: string) =>
-  //     setPostImage4({ name: file?.name, url: result })
-  //   );
-  // };
   const onFinishHandler = async (data: FieldValues) => {
     if (!postImage.name || !postImage2.name)
       return alert("Please Select Image");

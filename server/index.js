@@ -5,6 +5,7 @@ import cors from 'cors'
 import connectDB from "./mongodb/connect.js";
 import userRouter from './routes/user.routes.js'
 import postRouter from './routes/post.routes.js'
+import orderRouter from './routes/order.routes.js'
 import bodyParser from "body-parser";
 
 dotenv.config()
@@ -25,6 +26,7 @@ app.use('/api/v1/powder', postRouter)
 app.use('/api/v1/amino', postRouter)
 app.use('/api/v1/vitamin', postRouter)
 app.use('/api/v1/gainer', postRouter)
+app.use('/api/v1/order', orderRouter)
 
 const startServer = async () => {
     try {

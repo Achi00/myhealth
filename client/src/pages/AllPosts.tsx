@@ -10,13 +10,14 @@ import {
 } from "@pankod/refine-mui";
 import { useNavigate } from "@pankod/refine-react-router-v6";
 import { useGetIdentity } from "@pankod/refine-core";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PostCard, CustomButton } from "components";
 import { Loading } from "components";
 import { revealVariants } from "assets/motion";
 import { motion } from "framer-motion";
 
 const AllPosts = () => {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const {
     tableQueryResult: { data, isError, isLoading },
@@ -29,6 +30,18 @@ const AllPosts = () => {
     filters,
     setFilters,
   } = useTable();
+
+  useEffect(() => {
+    const closeSelectOnScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", closeSelectOnScroll);
+
+    return () => {
+      window.removeEventListener("scroll", closeSelectOnScroll);
+    };
+  }, []);
 
   const { data: user } = useGetIdentity();
 
@@ -96,7 +109,11 @@ const AllPosts = () => {
               flexWrap="wrap"
               mb={{ xs: "20px", sm: 0 }}
             >
-              <Stack direction="row">
+              <Stack
+                direction={{ lg: "row", md: "row", sm: "column", xs: "column" }}
+                gap="1rem"
+                alignItems="center"
+              >
                 <TextField
                   sx={{ paddingLeft: "40px" }}
                   variant="outlined"
@@ -116,6 +133,9 @@ const AllPosts = () => {
                   }}
                 />
                 <Select
+                  open={open}
+                  onOpen={() => setOpen(true)}
+                  onClose={() => setOpen(false)}
                   variant="outlined"
                   color="info"
                   displayEmpty
@@ -140,15 +160,24 @@ const AllPosts = () => {
                     </MenuItem>
                   ))}
                 </Select>
+                <Box
+                  sx={{ marginBottom: "25px" }}
+                  component="div"
+                  height="100%"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <CustomButton
+                    title={`Sort price ${currentPrice === "asc" ? "↑" : "↓"}`}
+                    handleClick={() => toggleSort("price")}
+                    backgroundColor="transparent"
+                    color="#000"
+                    height="60px"
+                    width="150px"
+                  />
+                </Box>
               </Stack>
-              <CustomButton
-                title={`Sort price ${currentPrice === "asc" ? "↑" : "↓"}`}
-                handleClick={() => toggleSort("price")}
-                backgroundColor="#023e8a"
-                color="#fcfcfc"
-                height="50px"
-                width="200px"
-              />
             </Box>
           </Box>
         </Stack>

@@ -7,7 +7,7 @@ import {
   ReadyPage,
   ErrorComponent,
 } from "@pankod/refine-mui";
-
+import { useRoutes } from "react-router-dom";
 import dataProvider from "@pankod/refine-simple-rest";
 import routerProvider from "@pankod/refine-react-router-v6";
 import axios, { AxiosRequestConfig } from "axios";
@@ -32,6 +32,8 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import MedicationIcon from "@mui/icons-material/Medication";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import Success from "pages/Success";
+import Orders from "pages/Orders";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((request: AxiosRequestConfig) => {
@@ -115,6 +117,62 @@ function App() {
     },
   };
 
+  // get user identity from localStorage
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const resources = [
+    {
+      name: "posts",
+      list: AllPosts,
+      show: PostDetails,
+      create: CreatePost,
+      edit: EditPost,
+      options: { label: "All products" },
+      icon: <ShoppingBagIcon />,
+    },
+    {
+      name: "powder",
+      list: Powder,
+      show: PostDetails,
+      options: { label: "Powders" },
+      icon: <ExtensionIcon />,
+    },
+    {
+      name: "amino",
+      list: Amino,
+      options: { label: "Amino Acids" },
+      icon: <FitnessCenterIcon />,
+    },
+    {
+      name: "vitamin",
+      list: Vitamin,
+      options: { label: "Vitamins" },
+      icon: <MedicationIcon />,
+    },
+    {
+      name: "gainer",
+      list: Gainer,
+      options: { label: "Gainers" },
+      icon: <UpgradeIcon />,
+    },
+    ...(user?.email === process.env.REACT_APP_ADMIN_USER
+      ? [
+          {
+            name: "order",
+            list: Orders,
+            options: { label: "Orders" },
+            icon: <UpgradeIcon />,
+          },
+        ]
+      : []),
+    // {
+    //   name: "success",
+    //   list: Success,
+    //   options: { label: "Success" },
+    //   icon: <UpgradeIcon />,
+    // },
+  ];
+
   return (
     <ColorModeContextProvider>
       <CssBaseline />
@@ -125,48 +183,21 @@ function App() {
           notificationProvider={notificationProvider}
           ReadyPage={ReadyPage}
           catchAll={<ErrorComponent />}
-          resources={[
-            {
-              name: "posts",
-              list: AllPosts,
-              show: PostDetails,
-              create: CreatePost,
-              edit: EditPost,
-              options: { label: "All products" },
-              icon: <ShoppingBagIcon />,
-            },
-            {
-              name: "powder",
-              list: Powder,
-              show: PostDetails,
-              options: { label: "Powders" },
-              icon: <ExtensionIcon />,
-            },
-            {
-              name: "amino",
-              list: Amino,
-              options: { label: "Amino Acids" },
-              icon: <FitnessCenterIcon />,
-            },
-            {
-              name: "vitamin",
-              list: Vitamin,
-              options: { label: "Vitamins" },
-              icon: <MedicationIcon />,
-            },
-            {
-              name: "gainer",
-              list: Gainer,
-              options: { label: "Gainers" },
-              icon: <UpgradeIcon />,
-            },
-          ]}
+          resources={resources}
           Title={Title}
           Sider={Sider}
           Layout={Layout}
           Header={Header}
-          // Footer={Footer}
-          routerProvider={routerProvider}
+          routerProvider={{
+            ...routerProvider,
+            routes: [
+              {
+                element: <Success />,
+                path: "/success",
+              },
+              // Add other custom routes if you have
+            ],
+          }}
           authProvider={authProvider}
           LoginPage={Login}
           DashboardPage={Home}

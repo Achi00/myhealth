@@ -18,17 +18,8 @@ import { revealVariants } from "assets/motion";
 import { motion } from "framer-motion";
 import { SelectChangeEvent } from "@mui/material";
 
-interface CurrentFilterValues {
-  productType: string;
-}
-
-interface Filter {
-  field: string;
-  operator: string;
-  value: string;
-}
-
 const Powder = () => {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const {
     tableQueryResult: { data, isError, isLoading },
@@ -52,6 +43,15 @@ const Powder = () => {
         value: "powder",
       },
     ]);
+    const closeSelectOnScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", closeSelectOnScroll);
+
+    return () => {
+      window.removeEventListener("scroll", closeSelectOnScroll);
+    };
   }, []); // Empty dependency array to run only on mount
 
   const currentFilterValues = useMemo(() => {
@@ -147,6 +147,9 @@ const Powder = () => {
                 defaultValue="powder"
                 value={currentFilterValues.productType}
                 onChange={handleChange}
+                open={open}
+                onOpen={() => setOpen(true)}
+                onClose={() => setOpen(false)}
               >
                 {["powder"].map((type) => (
                   <MenuItem key={type} value={type.toLowerCase()}>

@@ -31,6 +31,7 @@ const PostDetails = () => {
   const { queryResult } = useShow();
 
   const [selectedFlavor, setSelectedFlavor] = useState<string>("");
+  const [open, setOpen] = useState(false);
 
   const { decQty, incQty, qty, setQty, onAdd, cartItems } = useStateContext();
 
@@ -43,6 +44,18 @@ const PostDetails = () => {
   const handleChange = (event: SelectChangeEvent) => {
     setSelectedFlavor(event.target.value as string);
   };
+
+  useEffect(() => {
+    const closeSelectOnScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", closeSelectOnScroll);
+
+    return () => {
+      window.removeEventListener("scroll", closeSelectOnScroll);
+    };
+  }, []);
 
   const { data, isLoading, isError } = queryResult;
 
@@ -106,7 +119,7 @@ const PostDetails = () => {
       mx={{ lg: 10, md: 8, xs: 2 }}
     >
       <Stack
-        direction={{ lg: "row", md: "row", sm: "row", xs: "column" }}
+        direction={{ lg: "row", md: "column", sm: "column", xs: "column" }}
         gap="7vmin"
         justifyContent="center"
         alignItems="center"
@@ -178,6 +191,9 @@ const PostDetails = () => {
               value={selectedFlavor}
               onChange={handleChange}
               label="არომატი"
+              open={open}
+              onOpen={() => setOpen(true)}
+              onClose={() => setOpen(false)}
             >
               {flavor?.map((item: string, index: number) => (
                 <MenuItem value={item} key={index}>
@@ -213,21 +229,19 @@ const PostDetails = () => {
             </Stack>
           </Box>
         </Stack>
-        <Stack>
-          <Button
-            sx={{
-              color: "#023e8a",
-              borderColor: "#023e8a",
-            }}
-            variant="outlined"
-            onClick={() => onAdd(postDetails, qty, selectedFlavor)}
-            disabled={!selectedFlavor || stock < 1}
-          >
-            Add to Cart
-          </Button>
-        </Stack>
+        <Button
+          sx={{
+            color: "#023e8a",
+            borderColor: "#023e8a",
+          }}
+          variant="outlined"
+          onClick={() => onAdd(postDetails, qty, selectedFlavor)}
+          disabled={!selectedFlavor || stock < 1}
+        >
+          Add to Cart
+        </Button>
       </Stack>
-      <Box component="div">
+      <Box component="div" mt="4vw">
         <Stack>
           <Typography
             component="h2"

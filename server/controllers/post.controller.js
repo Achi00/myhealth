@@ -76,8 +76,6 @@ const createPost = async (req, res) => {
 
     const photoUrl = await cloudinary.uploader.upload(photo)
     const photoUrl2 = await cloudinary.uploader.upload(photo2)
-    // const photoUrl3 = await cloudinary.uploader.upload(photo3)
-    // const photoUrl4 = await cloudinary.uploader.upload(photo4)
 
     const newPost = await Post.create({
         title,

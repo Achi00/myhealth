@@ -1,9 +1,10 @@
 {
   "name": "client",
-  "homepage": "https://codeprops.com",
+  "homepage": "https://myhealth.codeprops.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@google-pay/button-react": "^3.0.9",
     "@mui/icons-material": "^5.8.3",
     "@pankod/refine-cli": "^1.2.0",
     "@pankod/refine-core": "^3.18.0",

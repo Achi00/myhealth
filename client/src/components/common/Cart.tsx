@@ -2,17 +2,53 @@ import React, { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { TiDeleteOutline } from "react-icons/ti";
-import {
-  AiOutlineMinus,
-  AiOutlinePlus,
-  AiOutlineShopping,
-  AiOutlineLeft,
-} from "react-icons/ai";
+import { AiOutlineLeft } from "react-icons/ai";
 import { useStateContext } from "context/StateContext";
 import { Typography, Box, Stack, Button } from "@pankod/refine-mui";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import GooglePayButton from "@google-pay/button-react";
+import { useNavigate } from "react-router-dom";
+
+const API_ENDPOINT = "/api/v1/order";
+
+interface CustomerDetails {
+  name: string;
+  address: string;
+  phoneNumber: string;
+}
+
+interface Item {
+  _id: string;
+  productId: string; // Since this references a Post, it's an ID represented as a string
+  title: string;
+  selectedFlavor: string;
+  price: number;
+  quantity: number;
+}
+
+interface OrderData {
+  items: Item[];
+  totalPrice: number;
+  customerDetails: CustomerDetails;
+}
+
+const createOrder = async (orderData: OrderData) => {
+  const response = await fetch(API_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(orderData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  return response.json();
+};
 
 const Cart = () => {
   const cartRef = useRef();
@@ -52,6 +88,8 @@ const Cart = () => {
       setTotalPrice(parsedSavedTotalPrice);
     }
   }, [totalPrice]);
+
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -128,6 +166,7 @@ const Cart = () => {
               borderBottom="1px solid #B8B8B8"
               justifyContent="center"
               alignItems="center"
+              key={item.id}
             >
               <img
                 style={{ width: "40%", height: "auto", borderRadius: "25px" }}
@@ -135,31 +174,54 @@ const Cart = () => {
                 alt="my health"
               />
               <Stack direction="column" padding="2vmin">
-                <Typography sx={{ color: "#000", fontSize: "3vmin" }}>
+                <Typography
+                  fontSize={{
+                    lg: "4vmin",
+                    md: "3vmin",
+                    sm: "4vmin",
+                    xs: "6vmin",
+                  }}
+                  sx={{ color: "#000" }}
+                >
                   {item.title}
                 </Typography>
                 <Typography
+                  fontSize={{
+                    lg: "3vmin",
+                    md: "2.5vmin",
+                    sm: "3vmin",
+                    xs: "4vmin",
+                  }}
                   sx={{
                     color: "#000",
-                    fontSize: "2vmin",
                     fontWeight: "bold",
                   }}
                 >
                   ფასი: {item.price} ₾
                 </Typography>
                 <Typography
+                  fontSize={{
+                    lg: "3vmin",
+                    md: "2.5vmin",
+                    sm: "3vmin",
+                    xs: "4vmin",
+                  }}
                   sx={{
                     color: "#000",
-                    fontSize: "2vmin",
                     fontWeight: "bold",
                   }}
                 >
                   რაოდენობა: {item.quantity}
                 </Typography>
                 <Typography
+                  fontSize={{
+                    lg: "3vmin",
+                    md: "2.5vmin",
+                    sm: "3vmin",
+                    xs: "4vmin",
+                  }}
                   sx={{
                     color: "#000",
-                    fontSize: "2vmin",
                     fontWeight: "bold",
                   }}
                 >
@@ -249,24 +311,77 @@ const Cart = () => {
               alignItems="center"
               paddingBottom="1vmin"
             >
-              <Button
-                sx={{
-                  color: "#fff",
-                  backgroundColor: "#023e8a",
-                  borderRadius: "35px",
-                  fontWeight: "bold",
-                  padding: "1vmin",
-                  width: "20vmin",
-                  "&:hover": {
-                    color: "#000",
-                    backgroundColor: "#0077b6",
+              <GooglePayButton
+                environment="TEST"
+                buttonSizeMode="fill"
+                paymentRequest={{
+                  apiVersion: 2,
+                  apiVersionMinor: 0,
+                  allowedPaymentMethods: [
+                    {
+                      type: "CARD",
+                      parameters: {
+                        allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                        allowedCardNetworks: ["MASTERCARD", "VISA"],
+                      },
+                      tokenizationSpecification: {
+                        type: "PAYMENT_GATEWAY",
+                        parameters: {
+                          gateway: "example",
+                          gatewayMerchantId: "exampleGatewayMerchantId",
+                        },
+                      },
+                    },
+                  ],
+                  merchantInfo: {
+                    merchantId: "BCR2DN4TWKAKDNLR",
+                    merchantName: "admin",
+                  },
+                  transactionInfo: {
+                    totalPriceStatus: "FINAL",
+                    totalPriceLabel: "Total",
+                    totalPrice: totalPrice.toString(),
+                    currencyCode: "GEL",
+                    countryCode: "GE",
                   },
                 }}
-                variant="text"
-                // onClick=""
-              >
-                Pay with Stripe
-              </Button>
+                onLoadPaymentData={async (paymentRequest) => {
+                  console.log(
+                    "load payment data",
+                    paymentRequest.paymentMethodData
+                  );
+
+                  // Construct your order data
+                  const orderData: OrderData = {
+                    items: cartItems.map((item: Item) => ({
+                      productId: item._id,
+                      title: item.title,
+                      selectedFlavor: item.selectedFlavor,
+                      price: item.price,
+                      quantity: item.quantity,
+                    })),
+                    totalPrice: totalPrice,
+                    customerDetails: {
+                      name: "John Doe", // placeholder, replace with actual data
+                      address: "123 Main St", // placeholder, replace with actual data
+                      phoneNumber: "1234567890", // placeholder, replace with actual data
+                    },
+                  };
+
+                  // Call your API
+                  try {
+                    const response = await createOrder(orderData);
+                    console.log(response);
+
+                    // If successful, navigate to the success page
+                    navigate("/success");
+                  } catch (error) {
+                    // Handle error
+                    console.log(error);
+                    toast.error("There was an error while creating the order");
+                  }
+                }}
+              />
             </Stack>
           </Box>
         )}

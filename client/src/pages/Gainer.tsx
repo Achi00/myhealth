@@ -29,6 +29,7 @@ interface Filter {
 }
 
 const Gainer = () => {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const {
     tableQueryResult: { data, isError, isLoading },
@@ -52,6 +53,15 @@ const Gainer = () => {
         value: "gainer",
       },
     ]);
+    const closeSelectOnScroll = () => {
+      setOpen(false);
+    };
+
+    window.addEventListener("scroll", closeSelectOnScroll);
+
+    return () => {
+      window.removeEventListener("scroll", closeSelectOnScroll);
+    };
   }, []); // Empty dependency array to run only on mount
 
   const currentFilterValues = useMemo(() => {
@@ -147,6 +157,9 @@ const Gainer = () => {
                 defaultValue="gainer"
                 value={currentFilterValues.productType}
                 onChange={handleChange}
+                open={open}
+                onOpen={() => setOpen(true)}
+                onClose={() => setOpen(false)}
               >
                 {["gainer"].map((type) => (
                   <MenuItem key={type} value={type.toLowerCase()}>
