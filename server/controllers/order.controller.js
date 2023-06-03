@@ -9,6 +9,27 @@ const getAllOrders = async (req, res) => {
     }
 }
 
+const createOrder = async (req, res) => {
+    try {
+        const { 
+            items,
+            totalPrice,
+            customerDetails,
+        } = req.body
+
+        const newOrder = await Order.create({
+            items,
+            totalPrice,
+            customerDetails,
+        })
+
+        res.status(200).json({ message: 'Order created successfully'})
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
 const deleteOrder = async (req, res) => {
     try {
       const { id } = req.params;
@@ -28,4 +49,5 @@ const deleteOrder = async (req, res) => {
 export {
     getAllOrders,
     deleteOrder,
+    createOrder
 }

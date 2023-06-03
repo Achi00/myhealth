@@ -344,6 +344,22 @@ const Cart = () => {
                     currencyCode: "GEL",
                     countryCode: "GE",
                   },
+                  shippingAddressRequired: true,
+                  shippingAddressParameters: {
+                    allowedCountryCodes: ["US", "GE"], // adjust this to the country codes you support
+                    phoneNumberRequired: true,
+                  },
+                  shippingOptionRequired: true,
+                  shippingOptionParameters: {
+                    defaultSelectedOptionId: "Free",
+                    shippingOptions: [
+                      {
+                        id: "Free",
+                        label: "Free Shipping",
+                        description: "Delivered in 5 business days",
+                      },
+                    ],
+                  },
                 }}
                 onLoadPaymentData={async (paymentRequest) => {
                   console.log(
@@ -351,34 +367,48 @@ const Cart = () => {
                     paymentRequest.paymentMethodData
                   );
 
-                  // Construct your order data
-                  const orderData: OrderData = {
-                    items: cartItems.map((item: Item) => ({
-                      productId: item._id,
-                      title: item.title,
-                      selectedFlavor: item.selectedFlavor,
-                      price: item.price,
-                      quantity: item.quantity,
-                    })),
-                    totalPrice: totalPrice,
-                    customerDetails: {
-                      name: "John Doe", // placeholder, replace with actual data
-                      address: "123 Main St", // placeholder, replace with actual data
-                      phoneNumber: "1234567890", // placeholder, replace with actual data
-                    },
-                  };
+                  const { shippingAddress } = paymentRequest;
+                  if (shippingAddress) {
+                    // Construct your order data
+                    const orderData = {
+                      items: cartItems.map((item: Item) => ({
+                        productId: item._id,
+                        title: item.title,
+                        selectedFlavor: item.selectedFlavor,
+                        price: item.price,
+                        quantity: item.quantity,
+                      })),
+                      totalPrice: totalPrice,
+                      customerDetails: {
+                        name: shippingAddress.name, // use data from Google Pay
+                        address: shippingAddress.address1, // use data from Google Pay
+                        phoneNumber: shippingAddress.phoneNumber, // placeholder, replace with actual data
+                      },
+                    };
 
-                  // Call your API
-                  try {
-                    const response = await createOrder(orderData);
-                    console.log(response);
+                    // Post the orderData to your API
+                    const response = await fetch(
+                      "http://localhost:8080/api/v1/order",
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(orderData),
+                      }
+                    );
 
-                    // If successful, navigate to the success page
-                    navigate("/success");
-                  } catch (error) {
-                    // Handle error
-                    console.log(error);
-                    toast.error("There was an error while creating the order");
+                    if (response.ok) {
+                      const responseData = await response.json();
+                      console.log("Order created successfully:", responseData);
+                      navigate("/success");
+                    } else {
+                      // handle error during order creation
+                      console.log("Error creating order:", response);
+                      toast.error(
+                        "There was an error while creating the order"
+                      );
+                    }
+                  } else {
+                    toast.error("Shipping address is undefined");
                   }
                 }}
               />
