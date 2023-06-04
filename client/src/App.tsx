@@ -31,9 +31,11 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import MedicationIcon from "@mui/icons-material/Medication";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import Success from "pages/Success";
 import Orders from "pages/Orders";
+import Footer from "components/Footer";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((request: AxiosRequestConfig) => {
@@ -161,16 +163,10 @@ function App() {
             name: "order",
             list: Orders,
             options: { label: "Orders" },
-            icon: <UpgradeIcon />,
+            icon: <MonetizationOnIcon />,
           },
         ]
       : []),
-    // {
-    //   name: "success",
-    //   list: Success,
-    //   options: { label: "Success" },
-    //   icon: <UpgradeIcon />,
-    // },
   ];
 
   return (
@@ -187,15 +183,15 @@ function App() {
           Title={Title}
           Sider={Sider}
           Layout={Layout}
+          Footer={Footer}
           Header={Header}
           routerProvider={{
             ...routerProvider,
             routes: [
               {
                 element: <Success />,
-                path: "/success",
+                path: "/success/:id",
               },
-              // Add other custom routes if you have
             ],
           }}
           authProvider={authProvider}

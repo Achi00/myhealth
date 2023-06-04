@@ -9,6 +9,35 @@ const getAllOrders = async (req, res) => {
     }
 }
 
+const getOrderDetail = async (req, res) => {
+  const { id } = req.params;
+  const orderExists = await Order.findOne({ _id: id });
+
+  if (orderExists) {
+    res.status(200).json(orderExists);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+const updateOrder = async (req, res) => {
+  const { id } = req.params;
+  const { isDelivered } = req.body;
+
+  try {
+    const order = await Order.findById(id);
+    if (order) {
+      order.isDelivered = isDelivered;
+      const updatedOrder = await order.save();
+      res.json(updatedOrder);
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating order' });
+  }
+};
+
 const createOrder = async (req, res) => {
     try {
         const { 
@@ -23,7 +52,7 @@ const createOrder = async (req, res) => {
             customerDetails,
         })
 
-        res.status(200).json({ message: 'Order created successfully'})
+        res.status(200).json({ message: 'Order created successfully', order: newOrder})
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -49,5 +78,7 @@ const deleteOrder = async (req, res) => {
 export {
     getAllOrders,
     deleteOrder,
-    createOrder
+    createOrder,
+    updateOrder,
+    getOrderDetail
 }

@@ -11,14 +11,6 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import GooglePayButton from "@google-pay/button-react";
 import { useNavigate } from "react-router-dom";
 
-const API_ENDPOINT = "/api/v1/order";
-
-interface CustomerDetails {
-  name: string;
-  address: string;
-  phoneNumber: string;
-}
-
 interface Item {
   _id: string;
   productId: string; // Since this references a Post, it's an ID represented as a string
@@ -27,28 +19,6 @@ interface Item {
   price: number;
   quantity: number;
 }
-
-interface OrderData {
-  items: Item[];
-  totalPrice: number;
-  customerDetails: CustomerDetails;
-}
-
-const createOrder = async (orderData: OrderData) => {
-  const response = await fetch(API_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(orderData),
-  });
-
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-
-  return response.json();
-};
 
 const Cart = () => {
   const cartRef = useRef();
@@ -399,7 +369,12 @@ const Cart = () => {
                     if (response.ok) {
                       const responseData = await response.json();
                       console.log("Order created successfully:", responseData);
-                      navigate("/success");
+                      navigate(`/success/${responseData.order._id}`);
+
+                      setCartItems([]); // set cart items to an empty array
+                      setTotalPrice(0); // set total price to 0
+                      localStorage.removeItem("cartItems"); // remove items from localStorage
+                      localStorage.removeItem("totalPrice"); // remove total price from localStorage
                     } else {
                       // handle error during order creation
                       console.log("Error creating order:", response);

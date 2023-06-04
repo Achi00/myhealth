@@ -1,7 +1,7 @@
-import logo from './molecule.png';
 import HeaderImg from './headerimg.png'
+import logo from './logo.png'
 
 export {
-  logo,
-  HeaderImg
+  HeaderImg,
+  logo
 };
